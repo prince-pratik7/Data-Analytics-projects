@@ -1,0 +1,26 @@
+---
+title: "Titanic Case (Part-II)"
+author: "Prince Barai"
+date: "February 5, 2018"
+output: html_document
+---
+# Synopsis
+This assignment is based on the case study of Titanic and it is divided in 3 parts:
+
+# Recall the Titanic Data.csv data associated with the "Sinking of the RMS Titanic" that you analyzed on WEEK 1, DAY 5
+```{r}
+titanic.df <- read.csv(paste("Titanic Data.csv", sep=""))
+View(titanic.df)
+```
+#Use R to create a table showing the average age of the survivors and the average age of the people who died.
+```{r}
+aggregate(titanic.df$Age, by=list(Survived=titanic.df$Survived),mean)
+```
+# Use R to run a t-test to test the following hypothesis:
+# H2: The Titanic survivors were younger than the passengers who died.
+t.test(Age ~ Survived, data=titanic.df)
+```{r}
+t.test(Age ~ Survived, data=titanic.df)
+```
+#Result of Independent t-test
+Based on the above output of the t-test, we can not reject the hypothesis that The Titanic survivors were younger than the passengers who died. (p>0.001)

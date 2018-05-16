@@ -1,0 +1,155 @@
+---
+title: "SixAirlinesData"
+author: "Prince Barai"
+date: "February 16, 2018"
+output: html_document
+---
+
+# Premium Economy Vs Economy Ticket Pricing by Airlines
+
+Premium Economy is found mostly on international flights and, compared to standard Economy, offers about 5-7 inches of extra legroom as well as additional amenities, which can include: 1-2 extra inches of seat width. 2-3 extra inches of seat recline. Adjustable headrests, legrests, or lumbar support.
+
+# RESEARCH QUESTION: What factors explain the difference in price between an economy ticket and a premium-economy airline ticket?
+
+```{r}
+airlines.df <- read.csv(paste("SixAirlinesDataV2.csv", sep=""))
+View(airlines.df)
+```
+
+Summarize the data to understand the mean, median, standard deviation of each variable
+
+```{r}
+library(psych)
+summary(airlines.df)
+```
+
+As we see from the above, we make the following observations:
+
+Airline Data is of 6 main row types with British Airways occupying the maximum entries.
+
+Boeing Aircraft is comes up more than Airbus in the Data.
+
+Flight Duration is averaged around 7.57 Hrs with minimum flight of 1 hr 2 mins and maximum time of 14 Hours & 6 mins
+
+The Price of Premium seats range around $1737.
+
+The Price of Economy Seats are lower, ranging around $1327.
+
+
+```{r}
+aggregate(list(PercentPremium=airlines.df$PercentPremiumSeats),list(name=airlines.df$Airline),FUN=mean)
+```
+So, as we see from the above Data, the percentage of Premium Seats are around 10-18 % of the total seats.
+
+# Draw Box Plots / Bar Plots to visualize the distribution of each variable independently
+
+
+```{r}
+Economy<-aggregate(airlines.df$SeatsEconomy,list(airlines.df$Airline),mean)
+Premium<-aggregate(airlines.df$SeatsPremium,list(airlines.df$Airline),mean)
+Economy
+```
+
+Premium
+
+```{r}
+Premium
+```
+
+
+# Draw Scatter Plots to understand how are the variables correlated pair-wise
+
+```{r}
+plot(airlines.df$Airline,airlines.df$SeatsPremium,col="purple",main="Airline vs Economy Seats",ylab="Mean Economy Seats")
+
+```
+
+
+
+```{r}
+plot(airlines.df$Airline,airlines.df$SeatsEconomy,col='light blue',main="Airline vs Premium Seats",ylab="Mean PremiumSeats")
+```
+
+
+# Correlation between Variables
+
+```{r}
+correlation_01 <-cor(airlines.df[,6:18])
+correlation_01[,7:8]
+```
+
+
+We can see that there are various Correlations among all rows and Price of Economy and Price Of Premium Seats.
+
+# Draw a Corrgram; Create a Variance-Covariance Matrix
+
+
+```{r}
+corr_01<-airlines.df[,3]+airlines.df[,6:14]
+corrr<-round(cor(corr_01),2)
+corrr
+```
+
+
+```{r}
+library(corrplot)
+```
+
+
+```{r}
+corrplot(corrr, method = "square")
+```
+
+
+From the above corrplot, we figure that the difference in price for a premium ticket and a economy ticket is mainly due to various airlines offering these seats
+
+
+# T-Test
+
+There is no effect of Airline on Price of Premium Seats and Economy Seats.
+
+```{r}
+myt<-table(airlines.df$PriceEconomy)
+myp<-table(airlines.df$PricePremium)
+myx<-table(airlines.df$Airline)
+t.test(myp,myx)
+```
+
+
+```{r}
+t.test(myt,myx)
+```
+
+
+Since the value of p is < 0.05, we can reject our null hypothesis that airlines do not play a significant role in pricing
+
+# Regression Analysis
+
+
+```{r}
+Model1=PricePremium~SeatsEconomy+FlightDuration+SeatsPremium+PitchEconomy+PitchPremium+WidthEconomy+WidthPremium+PriceEconomy+PriceRelative+SeatsTotal+PitchDifference+WidthDifference+PercentPremiumSeats
+
+fit<-lm(Model1,data=airlines.df)
+summary(fit)
+```
+
+
+
+```{r}
+Model2=PriceEconomy~SeatsEconomy+FlightDuration+SeatsPremium+PitchEconomy+PitchPremium+WidthEconomy+WidthPremium+PricePremium+PriceRelative+SeatsTotal+PitchDifference+WidthDifference+PercentPremiumSeats
+
+fit1<-lm(Model2,data=airlines.df)
+summary(fit)
+```
+
+
+
+We test for all Numeric values and on the basis of above information of Regression Analysis on both PricePremium and PriceEconomic, we infer that:
+
+SeatsEconomy , SeatsPremium ,PitchEconomy ,PitchPremium ,WidthEconomy ,PriceEconomy ,PriceRelative ,PercentPremiumSeats are highly significant Independent Variables.
+
+They are all highly significant and highly correlated to Price of the Seats. FlightDuration ,WidthPremium ,SeatsTotal, PitchDifference, WidthDifference are not significant at all having p>0.05
+
+# Other Observations:
+
+Residual Standard Error is 300.6 on 447 x-values. The model accounts for 94.67% of variance in the data. The Actual R-Squared Value is 94.55% as penalty is imposed for more than one x-value. F-STatistics check whether the predictor variables taken together, predict the response variable above chance levels.Here,F-Statistic are 794.5 on 10 implying high correlation among 10 x-vales and y. This shows us that this is a good model since the p-value is pretty low(2.2e-16) implying high correlation.

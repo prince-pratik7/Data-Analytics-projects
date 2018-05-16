@@ -1,0 +1,74 @@
+---
+title: "Titanic"
+author: "Prince Barai"
+date: "February 2, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Task 2B: Reading the DataSet
+fjdfndkfn
+```{r}
+titanic<-read.csv("Titanic Data.csv")
+head(titanic)
+```
+# Task 3A: Use R to Count the total numbe of passengers on board the Titanic
+```{r}
+nrow(titanic)
+```
+Total Number of Passengers : 889
+#Task 3B : Use R to Count the number of passengers who survived the sinking of the Titanic.
+```{r}
+mytable <- with(titanic,table(Survived))
+addmargins(mytable)
+```
+Total Number of Passengers Survived: 340
+# Task 3C : Use R to measure the percentage of passengers who survived the sinking of the Titanic.
+```{r}
+prop.table(mytable)*100
+```
+Percentage of Passengers Survived: 38.24522 %
+#Task 3D : Use R to count the number of first-class passengers who survived the sinking of the Titanic.
+```{r}
+mytable1<- xtabs(~Survived+Pclass , data=titanic)
+addmargins(mytable1)
+```
+Conclusion: 134 out of 214 first class passengers survived.
+
+#Task 3E : Use R to measure the percentage of first-class passengers who survived the sinking of the Titanic.
+```{r}
+prop.table(mytable1,2)*100
+```
+Conclusion: Percentage of First Class Passenger Survived = 62.61682% 
+
+#Task 3F : Use R to count the number of females from First-Class who survived the sinking of the Titanic
+```{r}
+mytable2 <- xtabs(~Pclass+Sex+Survived , data=titanic)
+mytable2
+```
+Conclusion: 89 Females of First Class Survived the Sinking of the Titanic
+
+#Task 3G : Use R to measure the percentage of survivors who were female
+```{r}
+mytable3 <- xtabs(~Sex+Survived , data=titanic)
+prop.table(mytable3,2)*100
+```
+Conclusion: Female Survivors in terms of Percentage = 67.94118 %
+
+# Task 3H : Use R to measure the percentage of females on board the Titanic who survived
+```{r}
+prop.table(mytable3,1)*100
+```
+Conclusion: Females on board the Titanic survived = 74.03846%
+
+# Task 3I : Run a Pearson's Chi-squared test to test the following hypothesis:
+Hypothesis: "The proportion of females onboard who survived the sinking of the Titanic was higher than the proportion of males onboard who survived the sinking of the Titanic."
+```{r}
+chisq.test(mytable3)
+```
+Conclusion: The p-values are the probability of obtaining the sampled results, assuming independence of the row and column variables in the population. Since the probability is small (p < 0.01), we reject the Null hypothesis that survival of passenger and sex of passenger are independent.
+
+Thus it suggests that whether a passenger will survive or not, depends on the sex of the passenger(male or female).
+

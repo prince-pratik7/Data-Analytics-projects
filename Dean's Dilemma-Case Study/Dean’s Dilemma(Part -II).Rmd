@@ -1,0 +1,58 @@
+---
+title: "Dean's Dilemma(Part-II)"
+author: "Prince Barai"
+date: "February 5, 2018"
+output: html_document
+---
+
+# Synopsis
+This assignment is based on the case study of Dean's Dilemma and it is in 6 parts:
+
+1.Submit your R code that creates a table showing the mean salary of males and females, who were placed.
+2.What is the average salary of male MBAs who were placed?
+3.What is the average salary of female MBAs who were placed?
+4.Submit R code to run a t-test for the Hypothesis "The average salary of the male MBAs is higher than the average salary of female MBAs."
+5.What is the p-value based on the t-test?
+6.Please interpret the meaning of the t-test, as applied to the average salaries of male and female MBAs.
+
+#Read the data set into RStudio
+```{r}
+deansdilemma.df <- read.csv(paste("Data - Deans Dilemma.csv", sep=""))
+View(deansdilemma.df)
+```
+# Use R to create a dataframe called placed, that contains a subset of only those students who were successfully placed.
+```{r}
+placed.df<-deansdilemma.df[which(deansdilemma.df$Placement_B==1),]
+View(placed.df)
+```
+# Submit your R code that creates a table showing the mean salary of males and females, who were placed.
+```{r}
+aggregate(placed.df$Salary, by=list(Gender=placed.df$Gender),mean)
+```
+# What is the average salary of male MBAs who were placed?
+```{r}
+male.df<-placed.df[which(placed.df$Gender.B==0),]
+View(male.df)
+mean(male.df$Salary)
+```
+# What is the average salary of female MBAs who were placed?
+```{r}
+female.df<-placed.df[which(placed.df$Gender.B==1),]
+View(female.df)
+mean(female.df$Salary)
+```
+# Submit R code to run a t-test for the Hypothesis "The average salary of the male MBAs is higher than the average salary of female MBAs."
+```{r}
+aggregate(placed.df$Salary, by=list(placed.df$Gender), FUN=mean)
+```
+# T-Test
+```{r}
+t.test(Salary ~ Gender, data=placed.df)
+```
+
+# What is the p-value based on the t-test?
+the p-value based on the t-test is 0.00234.
+
+# Please interpret the meaning of the t-test, as applied to the average salaries of male and female MBAs.
+Based on the above output of the t-test, we can not reject the hypothesis that "The average salary of the male MBAs is higher than the average salary of female MBAs." (p>0.001)
+

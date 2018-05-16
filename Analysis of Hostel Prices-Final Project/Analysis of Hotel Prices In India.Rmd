@@ -1,0 +1,332 @@
+---
+title: "Analysis of Hotel Prices In India"
+
+
+author: "Prince Barai"
+
+
+date: "February 22, 2018"
+output: html_document
+---
+<b> Analysis of Hotel Prices
+
+
+NAME: Prince Barai
+
+
+EMAIL: princepratik7284@gmail.com
+
+
+COLLEGE : University of Engineering & Management, Kolkata </b>
+
+
+
+<b>Setup The Working Directory and Make Sure This Package Are Already Installed</b>
+
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(corrgram)
+library(gridExtra) 
+library(vcd)
+library(psych)
+library(car)
+library(corrplot)
+```
+
+<b> Functions </b>
+
+```{r}
+detect_outliers <- function(inp, na.rm=TRUE) {
+  i.qnt <- quantile(inp, probs=c(.25, .75), na.rm=na.rm)
+  i.max <- 1.5 * IQR(inp, na.rm=na.rm)
+  otp <- inp
+  otp[inp < (i.qnt[1] - i.max)] <- NA
+  otp[inp > (i.qnt[2] + i.max)] <- NA
+  #inp <- count(inp[is.na(otp)])
+  sum(is.na(otp))
+}
+
+Non_outliers <- function(x, na.rm = TRUE, ...) {
+  qnt <- quantile(x, probs=c(.25, .75), na.rm = na.rm, ...)
+  H <- 1.5 * IQR(x, na.rm = na.rm)
+  y <- x
+  y[x < (qnt[1] - H)] <- NA
+  y[x > (qnt[2] + H)] <- NA
+  y
+}
+
+Remove_Outliers <- function ( z, na.rm = TRUE){
+ Out <- Non_outliers(z)
+ Out <-as.data.frame (Out)
+ z <- Out$Out[match(z, Out$Out)]
+ z
+}
+
+Graph_Boxplot <- function (input, na.rm = TRUE){
+Plot <- ggplot(dfrModel, aes(x="", y=input)) +
+            geom_boxplot(aes(fill=input), color="green") +
+            labs(title="Outliers")
+Plot
+}
+```
+
+
+<b> Reading The DataSet </b>
+
+
+```{r}
+dfrModel <- read.csv("./Cities42.csv", header=T, stringsAsFactors=F)
+```
+
+<b> Visualizing The Length And Breadth of Dataset </b>
+
+
+
+```{r}
+View(dfrModel)
+dim(dfrModel)
+```
+
+
+
+```{r}
+intRowCount <- nrow(dfrModel)
+head(dfrModel)
+```
+
+Observation I: 
+
+There are total 'intRowCount' data records in the file.
+As there are Non Numeric data as well in the given dataset, so we are going to remove the non numeric data.
+
+<b> Data Cleaning </b>
+
+
+
+```{r}
+
+dfrModel <- select(dfrModel, -c(CityName, Date, HotelName, HotelAddress, HotelDescription, HotelPincode ))
+```
+
+<b> Summary </b>
+
+
+```{r}
+describe(dfrModel$Population)[,c(2,3,4,5,8,9)]
+```
+
+
+```{r}
+describe(dfrModel$StarRating)[,c(2,3,4,5,8,9)]
+```
+
+```{r}
+describe(dfrModel$StarRating)[,c(2,3,4,5,8,9)]
+```
+
+
+```{r}
+describe(dfrModel$HotelCapacity)[,c(2,3,4,5,8,9)]
+```
+
+<b> Observations </b>
+
+Dependent Variable is
+Y = Hotel Rent
+
+Independent Variable is
+X1 = Star Rating
+X2 = IsTouristDestination
+X3 = Airport Distance
+X4 = Hotel Capacity
+
+<b> Creating Two Way Contigency Table </b>
+
+
+
+```{r}
+aggregate(dfrModel$RoomRent, by=list(weekend = dfrModel$IsWeekend, newyearseve = dfrModel$IsNewYearEve), mean)
+```
+
+
+```{r}
+aggregate(dfrModel$RoomRent, by=list(Metrocity = dfrModel$IsMetroCity, TouristPlace = dfrModel$IsTouristDestination), mean)
+```
+
+
+```{r}
+aggregate(dfrModel$RoomRent, by=list(freewifi = dfrModel$FreeWifi, freeBreakfast = dfrModel$FreeBreakfast, swimmingPool = dfrModel$HasSwimmingPool), mean)
+```
+
+<b> Box Plot </b>
+
+
+```{r}
+Graph_Boxplot(dfrModel$StarRating)
+```
+
+
+```{r}
+Graph_Boxplot(dfrModel$Airport)
+```
+
+```{r}
+Graph_Boxplot(dfrModel$HotelCapacity)
+```
+
+<b> Observations: </b>
+
+
+There are few outliers in the datasets
+
+<b> Drawing Coxplot and Comparing  </b>
+
+
+```{r}
+boxplot(dfrModel$RoomRent ~ dfrModel$IsWeekend, xlab = "Weekend" , ylab = "Room Rent" , main = "Comparison of Room rent over weekend or weekdays", ylim = c(0,30000), col = "skyblue")
+```
+
+
+<b> Drawing Histogram </b>
+
+
+```{r}
+hist(dfrModel$StarRating, main = "Star Rating Distribution", xlab = "Stars")
+```
+
+
+```{r}
+hist(dfrModel$Airport, main = "Distrubtion of distance to the nearest major airport", xlab = "Dist to the nearest major Airport in km")
+```
+
+<b> Tables </b>
+
+
+```{r}
+TouristDestination <- table(dfrModel$IsTouristDestination)
+TouristDestination
+```
+
+
+```{r}
+prop.table(TouristDestination)
+```
+
+<b> Observations </b>
+
+Here
+
+1 Implies Tourist Destination
+0 Implies Not an tourist destination
+
+<b> Scatter Plot </b>
+
+
+```{r}
+plot(y=dfrModel$RoomRent, x=dfrModel$Airport,
+     col="green",
+     ylim=c(0, 350000), xlim=c(0, 150), 
+     main="Relationship Btw Room Rent and Airport Distance",
+     ylab="Hotel Rent", xlab="Airport Distance")
+```
+
+
+```{r}
+scatterplot(dfrModel$Airport, dfrModel$RoomRent , main="Relationship Btw Room Rent and Airport Distance", xlab="Airport Distance", ylab="Hotel Rent")
+```
+
+
+```{r}
+
+plot((dfrModel$IsTouristDestination),jitter(dfrModel$RoomRent),
+     col="green",
+     ylim=c(0, 350000), xlim=c(0, 5), 
+     main="Relationship Btw Room Rent and Tourist Destination",
+     ylab="Hotel Rent", xlab="Tourist Destination")
+```
+
+```{r}
+plot(y=dfrModel$RoomRent, x=dfrModel$StarRating,
+     col="blue",
+     ylim=c(0, 350000), xlim=c(0, 10), 
+     main="Relationship Btw Room Rent and Star Rating of Hotel",
+     ylab="Hotel Rent", xlab="Star Rating")
+```
+
+
+```{r}
+plot(y=dfrModel$RoomRent, x=dfrModel$HotelCapacity,
+     col="green",
+     ylim=c(0, 350000), xlim=c(0, 150), 
+     main="Relationship Btw Room Rent and Hotel Capacity",
+     ylab="Hotel Rent", xlab="Hotel Capacity")
+```
+
+
+```{r}
+scatterplot(dfrModel$HotelCapacity, dfrModel$RoomRent , main="Relationship Btw Room Rent and Hotel Capacity", xlab="Hotel Capacity", ylab="Hotel Rent")
+```
+
+<b> Observations </b>
+
+
+1.Above scatter plot is showing some relationship between Hotel rent and other Independent variables.
+
+<b> Scatter Plot </b>
+
+
+```{r}
+corrplot(corr=cor(dfrModel[ , c(4,7,8,9,12)], use="complete.obs"), 
+         method ="ellipse")
+```
+
+<b> Correlation </b>
+
+
+```{r}
+cor(dfrModel[, c(4,7,8,9,12)]) 
+```
+
+<b> T-Test </b>
+ 
+```{r}
+t.test(dfrModel$RoomRent ~ dfrModel$IsNewYearEve)
+```
+
+From t-test that the P-Value = 3.046e-05 (<0.05) Which is small enough for Rejecting the Null Hupothesis.
+Hence there is impact on the room rents on New Year's eve and on other days.
+
+
+<b> Summary </b>
+
+
+Data has been loaded successfully
+
+
+Data has been summarized to know the different statistical values
+Outliers has been find out in each variable and Evry variable is plotted on Box plot to know about the outliers
+Dependent and Independent variable are find out.
+Dependent Variable is
+Y = Hotel Rent
+
+
+Independent Variable is
+
+
+X1 = Star Rating
+
+
+X2 = IsTouristDestination
+
+
+X3 = Airport Distance
+
+
+X4 Can also be Hotel Capacity
+
+<b> Scatter plot as well as Corrgram is plotted which is showing the relationship between salaries and other variables
+Continuous variable are shown on Box plot while tables is used for discrete variables.  </b>
+
